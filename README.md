@@ -4,7 +4,7 @@ Project that automaticly takes a picture from your webcam and count the number o
 
 RUNME:
 
-1. Open to command prompts, in one of them compile and run 'server.c', and in the other run 'img_processing.py'.
+1. Open two command prompts, in one of them compile and run 'server.c', and in the other run 'img_processing.py'.
 2. Position your webcam in front of the red dots
 3. In the C code, type 1 and press enter
 4. Wait about 5 seconds
