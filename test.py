@@ -1,41 +1,36 @@
 import cv2 as cv
+import numpy as np
 
-def valid(x, y):
-	return x >= 0 and x < n and y >= 0 and y < m and vis[x][y] == 0 and ft[x][y] > 0
+def process(frame):
+	if frame is None:
+		return -1
+
+	cv.imwrite('before.png', frame) #just saving the image for debugging purposes
+	frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV) #transforming to HSV format
+	ft = cv.inRange(frame_HSV, (0, 0, 0), (180, 255, 10)) #using treshold in image, only pixels in range will appear white
+
+	kernel = np.ones((5,5),np.uint8) #kernel of transformation
+	ft = cv.morphologyEx(ft, cv.MORPH_OPEN, kernel) #opennig image, removing background noise
+	ft = cv.morphologyEx(ft, cv.MORPH_CLOSE, kernel) #closing image, filling small holes
+	
+	cv.imwrite('after.png', ft) #just saving transformed image for debugging purposes
+	im2, contours, hierarchy = cv.findContours(ft, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE) #counting number of countours
+	return len(contours)
 
 
-def dfs(x, y):
-	vis[x][y] = 1 
-	tam = 1
-	for i in range(-5, 6):
-		for j in range(-5, 6):
-			nx, ny = x + i, y + j
-			if valid(nx, ny):
-				tam += dfs(nx, ny)
+def captureImg():
+	cap = cv.VideoCapture(0)
 
-	return tam
+	if cap is None:
+		return None
 
-#cap = cv.VideoCapture(0)
+	ret, frame = cap.read()
+	if ret is False:
+		return None
 
-frame = cv.imread('test.png')
-n, m = frame.shape[0], frame.shape[1]
-frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-ft = cv.inRange(frame_HSV, (0, 0, 0), (180, 255, 5))
-cv.imwrite('transform.png', ft)
+	return frame
 
-im2, contours, hierarchy = cv.findContours(ft, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-print(len(contours))
 
-print('------------------')
-
-vis = n*[m*[0]]
-ans, tresh = 0, 20
-for i in range(n):
-	for j in range(m):
-		if not vis[i][j] and ft[i][j] > 0:
-			tam = dfs(i, j)
-			print('(%d, %d) = %d' %(i, j, tam))
-			if tam >= tresh:
-				ans += 1
-
-print('ans = %d' %ans)
+if __name__ == '__main__':
+	img = captureImg()
+	print(process(img))
